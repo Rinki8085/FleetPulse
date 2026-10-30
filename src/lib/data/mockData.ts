@@ -1,4 +1,4 @@
-// Initial fleet dataset
+﻿// Initial fleet dataset
 import { Vehicle, Driver, Expense, MaintenanceTask, Trip, User } from '@/types/fleet';
 
 export const initialVehicles: Vehicle[] = [
@@ -5994,12 +5994,24 @@ export const initialTrips: Trip[] = [
 export const initialUsers: User[] = [
   {
     "id": "usr-01",
+    "name": "Alex Rivera",
+    "email": "alex.rivera@fleetpulse.io",
+    "role": "ADMIN"
+  },
+  {
+    "id": "usr-02",
+    "name": "Sarah Chen",
+    "email": "sarah.chen@fleetpulse.io",
+    "role": "VIEWER"
+  },
+  {
+    "id": "usr-03",
     "name": "Alex Morgan",
     "email": "admin@fleetpulse.dev",
     "role": "ADMIN"
   },
   {
-    "id": "usr-02",
+    "id": "usr-04",
     "name": "Jordan Lee",
     "email": "viewer@fleetpulse.dev",
     "role": "VIEWER"

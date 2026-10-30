@@ -64,7 +64,45 @@ export async function destroySession() {
   });
 }
 
-export async function verifyCredentials(email: string) {
-  const user = initialUsers.find(u => u.email.toLowerCase() === email.toLowerCase());
-  return user || null;
+export async function verifyCredentials(email: string): Promise<User> {
+  const cleanEmail = (email || '').trim().toLowerCase();
+
+  // 1. Check existing mock users (Alex Rivera, Sarah Chen, Alex Morgan, Jordan Lee)
+  const found = initialUsers.find(u => u.email.toLowerCase() === cleanEmail);
+  if (found) return found;
+
+  // 2. Check aliases for Admin demo
+  if (cleanEmail.includes('alex') || cleanEmail.includes('admin') || cleanEmail.includes('manager')) {
+    return {
+      id: 'usr-admin',
+      name: 'Alex Rivera',
+      email: cleanEmail || 'alex.rivera@fleetpulse.io',
+      role: 'ADMIN'
+    };
+  }
+
+  // 3. Check aliases for Viewer demo
+  if (cleanEmail.includes('sarah') || cleanEmail.includes('viewer') || cleanEmail.includes('jordan')) {
+    return {
+      id: 'usr-viewer',
+      name: 'Sarah Chen',
+      email: cleanEmail || 'sarah.chen@fleetpulse.io',
+      role: 'VIEWER'
+    };
+  }
+
+  // 4. Automatically accept ANY custom email provided!
+  const namePart = cleanEmail.split('@')[0] || 'Fleet Operator';
+  const formattedName = namePart
+    .replace(/[._-]/g, ' ')
+    .replace(/\b\w/g, l => l.toUpperCase());
+
+  const role: UserRole = cleanEmail.includes('view') ? 'VIEWER' : 'ADMIN';
+
+  return {
+    id: `usr-${Date.now().toString(36)}`,
+    name: formattedName,
+    email: cleanEmail,
+    role
+  };
 }

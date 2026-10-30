@@ -1,46 +1,45 @@
 ﻿'use client';
 
-import { useTransition, useState } from 'react';
-import { quickDemoLogin, loginAction } from '@/actions/auth';
-import { Truck, ShieldCheck, Eye, Sparkles, KeyRound, AlertCircle, ArrowRight } from 'lucide-react';
+import { useState } from 'react';
+import { Truck, ShieldCheck, Eye, Sparkles, KeyRound, AlertCircle, ArrowRight, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 
 export default function LoginPage() {
-  const [isPending, startTransition] = useTransition();
+  const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const handleQuickLogin = (email: string) => {
+  const performLogin = async (email: string) => {
+    setIsLoading(true);
     setErrorMessage(null);
-    startTransition(async () => {
-      try {
-        await quickDemoLogin(email);
-      } catch (err: unknown) {
-        // Next.js redirect throws NEXT_REDIRECT, which is normal
-        if (err && typeof err === 'object' && 'digest' in err) {
-          throw err;
-        }
-        setErrorMessage('Failed to sign in. Please try again.');
+
+    try {
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email.trim() }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok && data.success) {
+        // Immediate client navigation to vehicles with active cookie session
+        window.location.href = '/vehicles';
+        return;
       }
-    });
+
+      setErrorMessage(data.error || 'Failed to authenticate');
+      setIsLoading(false);
+    } catch {
+      setErrorMessage('Network error during authentication. Please retry.');
+      setIsLoading(false);
+    }
   };
 
   const handleFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setErrorMessage(null);
     const formData = new FormData(e.currentTarget);
-    startTransition(async () => {
-      try {
-        const res = await loginAction(formData);
-        if (res && !res.success) {
-          setErrorMessage(res.error || 'Authentication failed');
-        }
-      } catch (err: unknown) {
-        if (err && typeof err === 'object' && 'digest' in err) {
-          throw err;
-        }
-        setErrorMessage('Failed to sign in.');
-      }
-    });
+    const email = (formData.get('email') as string)?.trim() || 'alex.rivera@fleetpulse.io';
+    performLogin(email);
   };
 
   return (
@@ -63,7 +62,7 @@ export default function LoginPage() {
             <h1 className="text-2xl font-bold tracking-tight text-white">FleetPulse</h1>
           </div>
           <p className="text-xs text-slate-400 max-w-xs mx-auto">
-            High-performance fleet intelligence, real-time asset telemetry & operating cost analytics.
+            Sign in to access real-time fleet operations, telemetry & expense logs
           </p>
         </div>
 
@@ -83,15 +82,15 @@ export default function LoginPage() {
                 <Sparkles className="w-3.5 h-3.5 text-amber-400" />
                 Instant 1-Click Demo Profiles
               </span>
-              <span className="text-[0.65rem] text-slate-500">Day 2 Auth Ready</span>
+              <span className="text-[0.65rem] text-emerald-400 font-medium">Ready</span>
             </div>
 
             <div className="grid grid-cols-1 gap-2.5">
               {/* Admin Button */}
               <button
                 type="button"
-                onClick={() => handleQuickLogin('alex.rivera@fleetpulse.io')}
-                disabled={isPending}
+                onClick={() => performLogin('alex.rivera@fleetpulse.io')}
+                disabled={isLoading}
                 className="group p-3 rounded-2xl bg-slate-950/70 border border-emerald-500/30 hover:border-emerald-500/60 hover:bg-emerald-950/20 transition-all text-left flex items-start justify-between cursor-pointer disabled:opacity-50"
               >
                 <div className="flex items-start gap-3">
@@ -110,14 +109,18 @@ export default function LoginPage() {
                     </p>
                   </div>
                 </div>
-                <ArrowRight className="w-4 h-4 text-slate-600 group-hover:text-emerald-400 group-hover:translate-x-0.5 transition-all shrink-0 mt-2" />
+                {isLoading ? (
+                  <Loader2 className="w-4 h-4 text-emerald-400 animate-spin mt-2" />
+                ) : (
+                  <ArrowRight className="w-4 h-4 text-slate-600 group-hover:text-emerald-400 group-hover:translate-x-0.5 transition-all shrink-0 mt-2" />
+                )}
               </button>
 
               {/* Viewer Button */}
               <button
                 type="button"
-                onClick={() => handleQuickLogin('sarah.chen@fleetpulse.io')}
-                disabled={isPending}
+                onClick={() => performLogin('sarah.chen@fleetpulse.io')}
+                disabled={isLoading}
                 className="group p-3 rounded-2xl bg-slate-950/70 border border-slate-800 hover:border-sky-500/40 hover:bg-sky-950/20 transition-all text-left flex items-start justify-between cursor-pointer disabled:opacity-50"
               >
                 <div className="flex items-start gap-3">
@@ -136,7 +139,11 @@ export default function LoginPage() {
                     </p>
                   </div>
                 </div>
-                <ArrowRight className="w-4 h-4 text-slate-600 group-hover:text-sky-400 group-hover:translate-x-0.5 transition-all shrink-0 mt-2" />
+                {isLoading ? (
+                  <Loader2 className="w-4 h-4 text-sky-400 animate-spin mt-2" />
+                ) : (
+                  <ArrowRight className="w-4 h-4 text-slate-600 group-hover:text-sky-400 group-hover:translate-x-0.5 transition-all shrink-0 mt-2" />
+                )}
               </button>
             </div>
           </div>
@@ -144,19 +151,19 @@ export default function LoginPage() {
           <div className="relative flex items-center justify-center">
             <div className="border-t border-slate-800 w-full" />
             <span className="bg-slate-900 px-3 text-[0.65rem] text-slate-500 uppercase tracking-widest absolute">
-              or sign in with email
+              or sign in with any email
             </span>
           </div>
 
           {/* Email input form */}
           <form onSubmit={handleFormSubmit} className="space-y-3">
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-slate-300">Registered Work Email</label>
+              <label className="text-xs font-semibold text-slate-300">Any Email Address</label>
               <div className="relative">
                 <input
                   type="email"
                   name="email"
-                  placeholder="alex.rivera@fleetpulse.io"
+                  placeholder="alex.rivera@fleetpulse.io or your own email"
                   defaultValue="alex.rivera@fleetpulse.io"
                   required
                   className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-emerald-500 transition"
@@ -166,18 +173,27 @@ export default function LoginPage() {
 
             <button
               type="submit"
-              disabled={isPending}
+              disabled={isLoading}
               className="w-full py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 disabled:opacity-50 text-slate-950 font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20 transition cursor-pointer"
             >
-              <KeyRound className="w-4 h-4" />
-              {isPending ? 'Verifying Session...' : 'Authenticate & Enter Console'}
+              {isLoading ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <span>Signing In...</span>
+                </>
+              ) : (
+                <>
+                  <KeyRound className="w-4 h-4" />
+                  <span>Sign In (Auto-Accept Any Email)</span>
+                </>
+              )}
             </button>
           </form>
 
           {/* Native stack note */}
           <div className="pt-2 border-t border-slate-800/80 text-center">
             <p className="text-[0.65rem] text-slate-500 leading-relaxed">
-              🔐 Protected by Native Next.js 16 Cookie Session & App Router Middleware. Zero external BaaS required.
+              🔐 Protected by Native Next.js Cookie Session & Middleware Proxy. Zero external 3rd-party auth services required.
             </p>
           </div>
         </div>
