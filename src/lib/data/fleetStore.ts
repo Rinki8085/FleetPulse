@@ -2,7 +2,8 @@
   Vehicle, 
   Driver, 
   Expense, 
-  MaintenanceTask, 
+  MaintenanceTask,
+  MaintenanceStatus, 
   Trip, 
   User, 
   FleetStats, 
@@ -263,4 +264,51 @@ export async function getAllVehiclesForMap() {
     speed: v.status === 'ACTIVE' ? Math.floor(45 + Math.random() * 30) : 0,
     heading: Math.floor(Math.random() * 360)
   }));
+}
+
+export async function createMaintenanceTask(data: {
+  vehicleId: string;
+  description: string;
+  dueDate: string;
+  estimatedCost: number;
+  status?: MaintenanceStatus;
+}) {
+  const newTask: MaintenanceTask = {
+    id: 'maint-' + String(store.maintenanceTasks.length + 1).padStart(3, '0'),
+    status: data.status || 'SCHEDULED',
+    ...data
+  };
+  store.maintenanceTasks.unshift(newTask);
+  return newTask;
+}
+
+export async function updateMaintenanceTask(id: string, data: Partial<MaintenanceTask>) {
+  const idx = store.maintenanceTasks.findIndex(m => m.id === id);
+  if (idx !== -1) {
+    store.maintenanceTasks[idx] = { ...store.maintenanceTasks[idx], ...data };
+    return store.maintenanceTasks[idx];
+  }
+  return null;
+}
+
+export async function deleteMaintenanceTask(id: string) {
+  const idx = store.maintenanceTasks.findIndex(m => m.id === id);
+  if (idx !== -1) {
+    store.maintenanceTasks.splice(idx, 1);
+    return true;
+  }
+  return false;
+}
+
+export async function deleteExpense(id: string) {
+  const idx = store.expenses.findIndex(e => e.id === id);
+  if (idx !== -1) {
+    store.expenses.splice(idx, 1);
+    return true;
+  }
+  return false;
+}
+
+export async function getVehicleTrips(vehicleId: string) {
+  return store.trips.filter(t => t.vehicleId === vehicleId);
 }

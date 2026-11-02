@@ -6,6 +6,7 @@ import {
   Truck, 
   LayoutDashboard, 
   MapPin, 
+  Receipt,
   FileSpreadsheet, 
   LogOut, 
   ShieldCheck, 
@@ -56,7 +57,7 @@ export default async function AppLayout({
 
             <Link
               href="/vehicles"
-              className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-200 hover:text-white bg-slate-800/40 hover:bg-slate-800 border border-slate-800/60 transition group"
+              className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-200 hover:text-white hover:bg-slate-800 border border-transparent hover:border-slate-800/60 transition group"
             >
               <Truck className="w-4 h-4 text-emerald-400 group-hover:scale-110 transition-transform" />
               <span>Vehicles & Fleet</span>
@@ -66,8 +67,19 @@ export default async function AppLayout({
             </Link>
 
             <Link
+              href="/expenses"
+              className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-200 hover:text-white hover:bg-slate-800 border border-transparent hover:border-slate-800/60 transition group"
+            >
+              <Receipt className="w-4 h-4 text-emerald-400 group-hover:scale-110 transition-transform" />
+              <span>Expenses & Service</span>
+              <span className="ml-auto px-1.5 py-0.5 rounded text-[0.6rem] bg-emerald-500/20 text-emerald-300 font-mono">
+                Day 3
+              </span>
+            </Link>
+
+            <Link
               href="/dashboard"
-              className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-medium text-slate-400 hover:text-white hover:bg-slate-850 hover:bg-slate-800/40 transition group"
+              className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-medium text-slate-400 hover:text-white hover:bg-slate-800/40 transition group"
             >
               <LayoutDashboard className="w-4 h-4 text-slate-400 group-hover:text-cyan-400 group-hover:scale-110 transition-transform" />
               <span>KPI Dashboard</span>
@@ -76,7 +88,7 @@ export default async function AppLayout({
 
             <Link
               href="/map"
-              className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-medium text-slate-400 hover:text-white hover:bg-slate-850 hover:bg-slate-800/40 transition group"
+              className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-medium text-slate-400 hover:text-white hover:bg-slate-800/40 transition group"
             >
               <MapPin className="w-4 h-4 text-slate-400 group-hover:text-amber-400 group-hover:scale-110 transition-transform" />
               <span>Live Radar Map</span>
@@ -85,7 +97,7 @@ export default async function AppLayout({
 
             <Link
               href="/reports"
-              className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-medium text-slate-400 hover:text-white hover:bg-slate-850 hover:bg-slate-800/40 transition group"
+              className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-medium text-slate-400 hover:text-white hover:bg-slate-800/40 transition group"
             >
               <FileSpreadsheet className="w-4 h-4 text-slate-400 group-hover:text-purple-400 group-hover:scale-110 transition-transform" />
               <span>CSV & Reports</span>
@@ -100,7 +112,7 @@ export default async function AppLayout({
               <span className="text-[0.7rem] font-bold text-slate-300">In-Memory Engine</span>
             </div>
             <p className="text-[0.65rem] text-slate-500 leading-normal">
-              Zero external databases. Realtime Next.js memory cache holds 30 vehicles, 15 drivers, 670 expense logs.
+              Zero external databases. Realtime Next.js memory cache holds 30 vehicles, 15 drivers, 670+ expense logs.
             </p>
           </div>
         </div>

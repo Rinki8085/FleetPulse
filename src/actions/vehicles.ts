@@ -1,4 +1,4 @@
-'use server';
+﻿'use server';
 
 import { revalidatePath } from 'next/cache';
 import { 
@@ -8,9 +8,13 @@ import {
   updateVehicle, 
   deleteVehicle,
   createExpense,
+  deleteExpense,
+  createMaintenanceTask,
+  updateMaintenanceTask,
+  deleteMaintenanceTask,
   getFleetStats
 } from '@/lib/data/fleetStore';
-import { VehicleStatus, ExpenseType } from '@/types/fleet';
+import { VehicleStatus, ExpenseType, MaintenanceStatus } from '@/types/fleet';
 
 export async function fetchVehicles(options?: {
   search?: string;
@@ -26,8 +30,8 @@ export async function fetchVehicle(id: string) {
 }
 
 export async function createVehicleAction(formData: FormData): Promise<void> {
-  const plateNumber = formData.get('plateNumber') as string;
-  const model = formData.get('model') as string;
+  const plateNumber = (formData.get('plateNumber') as string)?.trim();
+  const model = (formData.get('model') as string)?.trim();
   const year = Number(formData.get('year') || new Date().getFullYear());
   const type = (formData.get('type') as 'Van' | 'Truck' | 'Semi' | 'Pickup') || 'Van';
   const status = (formData.get('status') as VehicleStatus) || 'ACTIVE';
@@ -54,11 +58,13 @@ export async function updateVehicleAction(id: string, formData: FormData): Promi
   const model = formData.get('model') as string;
   const status = formData.get('status') as VehicleStatus;
   const odometer = Number(formData.get('odometer'));
+  const driverId = formData.get('driverId') as string;
 
   await updateVehicle(id, {
     ...(model && { model }),
     ...(status && { status }),
-    ...(!isNaN(odometer) && { odometer })
+    ...(!isNaN(odometer) && { odometer }),
+    ...(driverId !== undefined && { driverId: driverId || undefined })
   });
 
   revalidatePath('/');
@@ -79,7 +85,7 @@ export async function addExpenseAction(formData: FormData): Promise<void> {
   const date = (formData.get('date') as string) || new Date().toISOString().split('T')[0];
   const note = (formData.get('note') as string) || '';
 
-  if (!vehicleId || !amount || !type) return;
+  if (!vehicleId || isNaN(amount) || !type) return;
 
   await createExpense({
     vehicleId,
@@ -91,7 +97,57 @@ export async function addExpenseAction(formData: FormData): Promise<void> {
 
   revalidatePath('/');
   revalidatePath('/dashboard');
+  revalidatePath('/expenses');
   revalidatePath('/vehicles/' + vehicleId);
+}
+
+export async function deleteExpenseAction(id: string, vehicleId?: string): Promise<void> {
+  await deleteExpense(id);
+  revalidatePath('/expenses');
+  revalidatePath('/dashboard');
+  if (vehicleId) {
+    revalidatePath('/vehicles/' + vehicleId);
+  }
+}
+
+export async function createMaintenanceTaskAction(formData: FormData): Promise<void> {
+  const vehicleId = formData.get('vehicleId') as string;
+  const description = (formData.get('description') as string)?.trim();
+  const dueDate = (formData.get('dueDate') as string) || new Date().toISOString().split('T')[0];
+  const estimatedCost = Number(formData.get('estimatedCost') || 0);
+  const status = (formData.get('status') as MaintenanceStatus) || 'SCHEDULED';
+
+  if (!vehicleId || !description) return;
+
+  await createMaintenanceTask({
+    vehicleId,
+    description,
+    dueDate,
+    estimatedCost,
+    status
+  });
+
+  revalidatePath('/expenses');
+  revalidatePath('/dashboard');
+  revalidatePath('/vehicles/' + vehicleId);
+}
+
+export async function updateMaintenanceStatusAction(id: string, status: MaintenanceStatus, vehicleId?: string): Promise<void> {
+  await updateMaintenanceTask(id, { status });
+  revalidatePath('/expenses');
+  revalidatePath('/dashboard');
+  if (vehicleId) {
+    revalidatePath('/vehicles/' + vehicleId);
+  }
+}
+
+export async function deleteMaintenanceTaskAction(id: string, vehicleId?: string): Promise<void> {
+  await deleteMaintenanceTask(id);
+  revalidatePath('/expenses');
+  revalidatePath('/dashboard');
+  if (vehicleId) {
+    revalidatePath('/vehicles/' + vehicleId);
+  }
 }
 
 export async function getStatsAction() {

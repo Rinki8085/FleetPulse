@@ -2,7 +2,9 @@
 import { getSession } from '@/lib/auth';
 import { VehicleStatus } from '@/types/fleet';
 import CreateVehicleModal from '@/components/vehicles/CreateVehicleModal';
+import EditVehicleModal from '@/components/vehicles/EditVehicleModal';
 import DeleteVehicleButton from '@/components/vehicles/DeleteVehicleButton';
+import Pagination from '@/components/vehicles/Pagination';
 import { 
   Truck, 
   Search, 
@@ -14,27 +16,30 @@ import {
   Activity, 
   Wrench,
   AlertTriangle,
-  RotateCcw
+  RotateCcw,
+  ArrowRight,
+  ExternalLink
 } from 'lucide-react';
 import Link from 'next/link';
 
-// dynamic inferred
-
 export default async function VehiclesPage(props: {
-  searchParams?: Promise<{ search?: string; status?: string }>;
+  searchParams?: Promise<{ search?: string; status?: string; page?: string }>;
 }) {
   const searchParams = await props.searchParams;
   const search = searchParams?.search || '';
   const status = searchParams?.status || '';
+  const page = Math.max(1, Number(searchParams?.page || 1));
+  const limit = 8;
 
   const session = await getSession();
   const isAdmin = session?.role === 'ADMIN';
 
-  const [{ vehicles, total }, drivers, stats] = await Promise.all([
+  const [{ vehicles, total, totalPages }, drivers, stats] = await Promise.all([
     getVehicles({
       search: search || undefined,
       status: status || undefined,
-      limit: 100
+      page,
+      limit
     }),
     getDrivers(),
     getFleetStats()
@@ -68,11 +73,11 @@ export default async function VehiclesPage(props: {
           <div className="flex items-center gap-3">
             <h1 className="text-2xl font-bold tracking-tight text-white">Fleet Asset Management</h1>
             <span className="px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-300 text-xs font-mono font-medium border border-slate-700">
-              {total} Assets
+              {total} Total Assets
             </span>
           </div>
           <p className="text-xs text-slate-400 mt-1">
-            Realtime telemetry, operational status, odometer logs and asset decommissioning.
+            Realtime telemetry, operational status, odometer logs, driver assignment, and pagination.
           </p>
         </div>
 
@@ -157,7 +162,7 @@ export default async function VehiclesPage(props: {
             Filter
           </button>
 
-          {(search || status) && (
+          {(search || status || page > 1) && (
             <Link
               href="/vehicles"
               className="px-3 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white text-xs flex items-center gap-1.5 transition border border-slate-800"
@@ -221,9 +226,13 @@ export default async function VehiclesPage(props: {
                     >
                       {/* Vehicle identifier */}
                       <td className="py-3.5 px-4">
-                        <div className="font-semibold text-white group-hover:text-emerald-300 transition-colors">
-                          {v.model}
-                        </div>
+                        <Link 
+                          href={'/vehicles/' + v.id}
+                          className="font-semibold text-white group-hover:text-emerald-300 transition-colors flex items-center gap-1.5"
+                        >
+                          <span>{v.model}</span>
+                          <ArrowRight className="w-3 h-3 text-slate-600 group-hover:text-emerald-400 group-hover:translate-x-0.5 transition-all opacity-0 group-hover:opacity-100" />
+                        </Link>
                         <div className="font-mono text-[0.65rem] text-slate-400 mt-0.5 inline-block px-1.5 py-0.5 rounded bg-slate-950 border border-slate-800">
                           {v.plateNumber}
                         </div>
@@ -284,6 +293,14 @@ export default async function VehiclesPage(props: {
                       {/* Actions */}
                       <td className="py-3.5 px-4 text-right">
                         <div className="flex items-center justify-end gap-1">
+                          <Link
+                            href={'/vehicles/' + v.id}
+                            title="View Vehicle Sheet"
+                            className="p-1.5 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-emerald-400 transition cursor-pointer"
+                          >
+                            <ExternalLink className="w-4 h-4" />
+                          </Link>
+                          <EditVehicleModal vehicle={v} drivers={drivers} isAdmin={isAdmin} />
                           <DeleteVehicleButton vehicleId={v.id} isAdmin={isAdmin} />
                         </div>
                       </td>
@@ -294,6 +311,16 @@ export default async function VehiclesPage(props: {
             </tbody>
           </table>
         </div>
+
+        {/* Pagination bar */}
+        <Pagination
+          currentPage={page}
+          totalPages={totalPages}
+          totalItems={total}
+          limit={limit}
+          search={search}
+          status={status}
+        />
       </div>
     </div>
   );
