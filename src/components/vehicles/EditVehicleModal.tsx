@@ -3,6 +3,7 @@
 import { useState, useTransition } from 'react';
 import { updateVehicleAction } from '@/actions/vehicles';
 import { Vehicle, Driver, VehicleStatus } from '@/types/fleet';
+import NextUISelect, { SelectOption } from '@/components/ui/NextUISelect';
 import { Edit2, X, Truck } from 'lucide-react';
 
 interface EditVehicleModalProps {
@@ -29,6 +30,21 @@ export default function EditVehicleModal({
       setIsOpen(false);
     });
   };
+
+  const statusOptions: SelectOption[] = [
+    { value: 'ACTIVE', label: 'ACTIVE (In Yard / Ready)', badge: 'ACTIVE', badgeColor: 'bg-emerald-500/20 text-emerald-400' },
+    { value: 'IN_SERVICE', label: 'IN_SERVICE (On Route)', badge: 'ROUTE', badgeColor: 'bg-sky-500/20 text-sky-400' },
+    { value: 'DECOMMISSIONED', label: 'DECOMMISSIONED', badge: 'IDLE', badgeColor: 'bg-slate-700/40 text-slate-400' },
+  ];
+
+  const driverOptions: SelectOption[] = [
+    { value: '', label: 'Unassigned', subLabel: 'No primary driver assigned' },
+    ...drivers.map((d) => ({
+      value: d.id,
+      label: d.name,
+      subLabel: `License: ${d.licenseNumber} (Exp: ${d.licenseExpiry})`,
+    })),
+  ];
 
   return (
     <>
@@ -78,19 +94,6 @@ export default function EditVehicleModal({
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-slate-300">Operational Status</label>
-                  <select
-                    name="status"
-                    defaultValue={vehicle.status}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white focus:outline-none focus:border-cyan-500 transition cursor-pointer"
-                  >
-                    <option value="ACTIVE">ACTIVE (In Yard / Ready)</option>
-                    <option value="IN_SERVICE">IN_SERVICE (On Route)</option>
-                    <option value="DECOMMISSIONED">DECOMMISSIONED</option>
-                  </select>
-                </div>
-
-                <div className="space-y-1.5">
                   <label className="text-xs font-semibold text-slate-300">Odometer (km)</label>
                   <input
                     name="odometer"
@@ -100,22 +103,24 @@ export default function EditVehicleModal({
                     className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white focus:outline-none focus:border-cyan-500 transition"
                   />
                 </div>
+              </div>
 
-                <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-slate-300">Assigned Driver</label>
-                  <select
-                    name="driverId"
-                    defaultValue={vehicle.driverId || ''}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white focus:outline-none focus:border-cyan-500 transition cursor-pointer"
-                  >
-                    <option value="">Unassigned</option>
-                    {drivers.map((d) => (
-                      <option key={d.id} value={d.id}>
-                        {d.name} ({d.licenseNumber})
-                      </option>
-                    ))}
-                  </select>
-                </div>
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-slate-300">Operational Status</label>
+                <NextUISelect
+                  name="status"
+                  defaultValue={vehicle.status}
+                  options={statusOptions}
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-slate-300">Assigned Driver</label>
+                <NextUISelect
+                  name="driverId"
+                  defaultValue={vehicle.driverId || ''}
+                  options={driverOptions}
+                />
               </div>
 
               <div className="flex items-center justify-end gap-3 border-t border-slate-800/80 pt-4">

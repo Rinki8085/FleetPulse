@@ -5,6 +5,7 @@ import CreateExpenseModal from '@/components/expenses/CreateExpenseModal';
 import CreateMaintenanceModal from '@/components/expenses/CreateMaintenanceModal';
 import MaintenanceStatusToggle from '@/components/expenses/MaintenanceStatusToggle';
 import DeleteItemButton from '@/components/expenses/DeleteItemButton';
+import NextUISelect, { SelectOption } from '@/components/ui/NextUISelect';
 import { 
   DollarSign, 
   Fuel, 
@@ -72,6 +73,35 @@ export default async function ExpensesPage(props: {
   if (vehicleFilter) {
     filteredMaintenance = filteredMaintenance.filter((m) => m.vehicleId === vehicleFilter);
   }
+
+  // NextUI select options for categories
+  const categoryOptions: SelectOption[] = [
+    { value: '', label: 'All Categories' },
+    { value: 'FUEL', label: 'Fuel & EV Charging', badge: 'FUEL', badgeColor: 'bg-emerald-500/20 text-emerald-400' },
+    { value: 'MAINTENANCE', label: 'Workshop Maintenance', badge: 'MAINT', badgeColor: 'bg-amber-500/20 text-amber-400' },
+    { value: 'TOLL', label: 'Highway Tolls', badge: 'TOLL', badgeColor: 'bg-cyan-500/20 text-cyan-400' },
+    { value: 'OTHER', label: 'Miscellaneous / Other', badge: 'OTHER', badgeColor: 'bg-purple-500/20 text-purple-400' },
+  ];
+
+  // NextUI select options for vehicles
+  const vehicleOptions: SelectOption[] = [
+    { value: '', label: 'All Vehicles', subLabel: 'Entire active fleet' },
+    ...vehicles.map((v) => ({
+      value: v.id,
+      label: v.plateNumber,
+      subLabel: `${v.model} (${v.type})`,
+      badge: v.status,
+      badgeColor: v.status === 'ACTIVE' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-sky-500/20 text-sky-400',
+    })),
+  ];
+
+  // NextUI select options for maintenance status
+  const maintStatusOptions: SelectOption[] = [
+    { value: '', label: 'All Statuses' },
+    { value: 'SCHEDULED', label: 'Scheduled', badge: 'PLAN', badgeColor: 'bg-amber-500/20 text-amber-400' },
+    { value: 'IN_PROGRESS', label: 'In Progress', badge: 'WIP', badgeColor: 'bg-cyan-500/20 text-cyan-400' },
+    { value: 'COMPLETED', label: 'Completed', badge: 'DONE', badgeColor: 'bg-emerald-500/20 text-emerald-400' },
+  ];
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
@@ -184,45 +214,34 @@ export default async function ExpensesPage(props: {
       {/* TAB 1: EXPENSES LEDGER */}
       {currentTab === 'expenses' && (
         <div className="space-y-4">
-          {/* Filters */}
+          {/* NextUI-Styled Filters Bar */}
           <div className="p-4 rounded-2xl bg-slate-900/60 border border-slate-800 flex flex-wrap items-center justify-between gap-3 text-xs">
             <form method="GET" action="/expenses" className="flex flex-wrap items-center gap-3">
               <input type="hidden" name="tab" value="expenses" />
 
-              <div className="flex items-center gap-2">
-                <Filter className="w-3.5 h-3.5 text-slate-500" />
-                <select
+              {/* NextUI Category Select */}
+              <div className="w-48 sm:w-56">
+                <NextUISelect
                   name="type"
                   defaultValue={typeFilter || ''}
-                  className="px-3 py-1.5 rounded-xl bg-slate-950 border border-slate-800 text-xs text-slate-300 focus:outline-none focus:border-emerald-500 transition cursor-pointer"
-                >
-                  <option value="">All Categories</option>
-                  <option value="FUEL">Fuel & EV</option>
-                  <option value="MAINTENANCE">Maintenance</option>
-                  <option value="TOLL">Road Tolls</option>
-                  <option value="OTHER">Other / Misc</option>
-                </select>
+                  options={categoryOptions}
+                  icon={<Filter className="w-3.5 h-3.5" />}
+                />
               </div>
 
-              <div className="flex items-center gap-2">
-                <Truck className="w-3.5 h-3.5 text-slate-500" />
-                <select
+              {/* NextUI Vehicle Select */}
+              <div className="w-64 sm:w-72">
+                <NextUISelect
                   name="vehicleId"
                   defaultValue={vehicleFilter || ''}
-                  className="px-3 py-1.5 rounded-xl bg-slate-950 border border-slate-800 text-xs text-slate-300 focus:outline-none focus:border-emerald-500 transition cursor-pointer"
-                >
-                  <option value="">All Vehicles</option>
-                  {vehicles.map((v) => (
-                    <option key={v.id} value={v.id}>
-                      {v.plateNumber} ({v.model})
-                    </option>
-                  ))}
-                </select>
+                  options={vehicleOptions}
+                  icon={<Truck className="w-3.5 h-3.5" />}
+                />
               </div>
 
               <button
                 type="submit"
-                className="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-semibold transition cursor-pointer"
+                className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-semibold transition cursor-pointer text-xs"
               >
                 Apply Filter
               </button>
@@ -230,9 +249,9 @@ export default async function ExpensesPage(props: {
               {(typeFilter || vehicleFilter) && (
                 <Link
                   href="/expenses?tab=expenses"
-                  className="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white flex items-center gap-1 border border-slate-800 transition"
+                  className="px-3.5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white flex items-center gap-1.5 border border-slate-800 transition text-xs"
                 >
-                  <RotateCcw className="w-3 h-3" />
+                  <RotateCcw className="w-3.5 h-3.5" />
                   Reset
                 </Link>
               )}
@@ -298,7 +317,7 @@ export default async function ExpensesPage(props: {
                             </span>
                           </td>
                           <td className="py-3 px-4 text-slate-300 max-w-sm truncate">
-                            {e.note || '—'}
+                            {e.note || '?'}
                           </td>
                           <td className="py-3 px-4 text-right font-mono font-bold text-white">
                             ${e.amount.toFixed(2)}
@@ -324,44 +343,34 @@ export default async function ExpensesPage(props: {
       {/* TAB 2: MAINTENANCE SCHEDULE */}
       {currentTab === 'maintenance' && (
         <div className="space-y-4">
-          {/* Filters */}
+          {/* NextUI-Styled Filters Bar */}
           <div className="p-4 rounded-2xl bg-slate-900/60 border border-slate-800 flex flex-wrap items-center justify-between gap-3 text-xs">
             <form method="GET" action="/expenses" className="flex flex-wrap items-center gap-3">
               <input type="hidden" name="tab" value="maintenance" />
 
-              <div className="flex items-center gap-2">
-                <Filter className="w-3.5 h-3.5 text-slate-500" />
-                <select
+              {/* NextUI Maintenance Status Select */}
+              <div className="w-48 sm:w-56">
+                <NextUISelect
                   name="maintStatus"
                   defaultValue={maintStatusFilter || ''}
-                  className="px-3 py-1.5 rounded-xl bg-slate-950 border border-slate-800 text-xs text-slate-300 focus:outline-none focus:border-amber-500 transition cursor-pointer"
-                >
-                  <option value="">All Statuses</option>
-                  <option value="SCHEDULED">Scheduled</option>
-                  <option value="IN_PROGRESS">In Progress</option>
-                  <option value="COMPLETED">Completed</option>
-                </select>
+                  options={maintStatusOptions}
+                  icon={<Filter className="w-3.5 h-3.5" />}
+                />
               </div>
 
-              <div className="flex items-center gap-2">
-                <Truck className="w-3.5 h-3.5 text-slate-500" />
-                <select
+              {/* NextUI Vehicle Select */}
+              <div className="w-64 sm:w-72">
+                <NextUISelect
                   name="vehicleId"
                   defaultValue={vehicleFilter || ''}
-                  className="px-3 py-1.5 rounded-xl bg-slate-950 border border-slate-800 text-xs text-slate-300 focus:outline-none focus:border-amber-500 transition cursor-pointer"
-                >
-                  <option value="">All Vehicles</option>
-                  {vehicles.map((v) => (
-                    <option key={v.id} value={v.id}>
-                      {v.plateNumber} ({v.model})
-                    </option>
-                  ))}
-                </select>
+                  options={vehicleOptions}
+                  icon={<Truck className="w-3.5 h-3.5" />}
+                />
               </div>
 
               <button
                 type="submit"
-                className="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-semibold transition cursor-pointer"
+                className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-semibold transition cursor-pointer text-xs"
               >
                 Apply Filter
               </button>
@@ -369,9 +378,9 @@ export default async function ExpensesPage(props: {
               {(maintStatusFilter || vehicleFilter) && (
                 <Link
                   href="/expenses?tab=maintenance"
-                  className="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white flex items-center gap-1 border border-slate-800 transition"
+                  className="px-3.5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white flex items-center gap-1.5 border border-slate-800 transition text-xs"
                 >
-                  <RotateCcw className="w-3 h-3" />
+                  <RotateCcw className="w-3.5 h-3.5" />
                   Reset
                 </Link>
               )}

@@ -3,6 +3,7 @@
 import { useTransition } from 'react';
 import { updateMaintenanceStatusAction } from '@/actions/vehicles';
 import { MaintenanceStatus } from '@/types/fleet';
+import NextUISelect, { SelectOption } from '@/components/ui/NextUISelect';
 
 interface MaintenanceStatusToggleProps {
   taskId: string;
@@ -18,13 +19,6 @@ export default function MaintenanceStatusToggle({
   isAdmin,
 }: MaintenanceStatusToggleProps) {
   const [isPending, startTransition] = useTransition();
-
-  const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const newStatus = e.target.value as MaintenanceStatus;
-    startTransition(async () => {
-      await updateMaintenanceStatusAction(taskId, newStatus, vehicleId);
-    });
-  };
 
   const statusStyles: Record<MaintenanceStatus, string> = {
     SCHEDULED: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
@@ -42,16 +36,26 @@ export default function MaintenanceStatusToggle({
     );
   }
 
+  const options: SelectOption[] = [
+    { value: 'SCHEDULED', label: 'Scheduled', badge: 'PLAN', badgeColor: 'bg-amber-500/20 text-amber-400' },
+    { value: 'IN_PROGRESS', label: 'In Progress', badge: 'WIP', badgeColor: 'bg-cyan-500/20 text-cyan-400' },
+    { value: 'COMPLETED', label: 'Completed', badge: 'DONE', badgeColor: 'bg-emerald-500/20 text-emerald-400' },
+  ];
+
+  const handleSelect = (val: string) => {
+    startTransition(async () => {
+      await updateMaintenanceStatusAction(taskId, val as MaintenanceStatus, vehicleId);
+    });
+  };
+
   return (
-    <select
-      value={currentStatus}
-      onChange={handleChange}
-      disabled={isPending}
-      className={`px-2.5 py-1 rounded-xl text-[0.7rem] font-semibold border focus:outline-none transition cursor-pointer disabled:opacity-50 ${statusStyles[currentStatus]}`}
-    >
-      <option value="SCHEDULED" className="bg-slate-900 text-amber-400">Scheduled</option>
-      <option value="IN_PROGRESS" className="bg-slate-900 text-cyan-400">In Progress</option>
-      <option value="COMPLETED" className="bg-slate-900 text-emerald-400">Completed</option>
-    </select>
+    <div className="w-36">
+      <NextUISelect
+        value={currentStatus}
+        options={options}
+        onChange={handleSelect}
+        disabled={isPending}
+      />
+    </div>
   );
 }

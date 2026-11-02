@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from 'react';
 import { createVehicleAction } from '@/actions/vehicles';
+import NextUISelect, { SelectOption } from '@/components/ui/NextUISelect';
 import { Plus, X, Truck, ShieldAlert } from 'lucide-react';
 
 export default function CreateVehicleModal({ isAdmin }: { isAdmin: boolean }) {
@@ -30,6 +31,19 @@ export default function CreateVehicleModal({ isAdmin }: { isAdmin: boolean }) {
       setIsOpen(false);
     });
   };
+
+  const typeOptions: SelectOption[] = [
+    { value: 'Van', label: 'Commercial Van', subLabel: 'Last-mile delivery van', badge: 'VAN' },
+    { value: 'Truck', label: 'Cargo Box Truck', subLabel: 'Medium-duty urban logistics', badge: 'TRUCK' },
+    { value: 'Semi', label: 'Semi-Trailer', subLabel: 'Heavy-duty long-haul transport', badge: 'SEMI' },
+    { value: 'Pickup', label: 'Pickup Utility Truck', subLabel: 'Field service & rapid response', badge: 'PICKUP' },
+  ];
+
+  const statusOptions: SelectOption[] = [
+    { value: 'ACTIVE', label: 'ACTIVE (Available in Yard)', badge: 'ACTIVE', badgeColor: 'bg-emerald-500/20 text-emerald-400' },
+    { value: 'IN_SERVICE', label: 'IN_SERVICE (On Route)', badge: 'ROUTE', badgeColor: 'bg-sky-500/20 text-sky-400' },
+    { value: 'DECOMMISSIONED', label: 'DECOMMISSIONED', badge: 'IDLE', badgeColor: 'bg-slate-700/40 text-slate-400' },
+  ];
 
   return (
     <>
@@ -72,7 +86,7 @@ export default function CreateVehicleModal({ isAdmin }: { isAdmin: boolean }) {
                     name="plateNumber" 
                     placeholder="e.g. FP-2026-99"
                     required
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-emerald-500 transition"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-emerald-500 transition font-mono"
                   />
                 </div>
 
@@ -80,26 +94,23 @@ export default function CreateVehicleModal({ isAdmin }: { isAdmin: boolean }) {
                   <label className="text-xs font-semibold text-slate-300">Model Name *</label>
                   <input 
                     name="model" 
-                    placeholder="e.g. Mercedes Sprinter"
+                    placeholder="e.g. Mercedes Sprinter 314"
                     required
                     className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-emerald-500 transition"
                   />
                 </div>
+              </div>
 
-                <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-slate-300">Vehicle Type</label>
-                  <select 
-                    name="type" 
-                    defaultValue="Van"
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white focus:outline-none focus:border-emerald-500 transition cursor-pointer"
-                  >
-                    <option value="Van">Van</option>
-                    <option value="Truck">Truck</option>
-                    <option value="Semi">Semi-Trailer</option>
-                    <option value="Pickup">Pickup</option>
-                  </select>
-                </div>
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-slate-300">Vehicle Type</label>
+                <NextUISelect
+                  name="type"
+                  defaultValue="Van"
+                  options={typeOptions}
+                />
+              </div>
 
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
                   <label className="text-xs font-semibold text-slate-300">Model Year</label>
                   <input 
@@ -122,19 +133,15 @@ export default function CreateVehicleModal({ isAdmin }: { isAdmin: boolean }) {
                     className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white focus:outline-none focus:border-emerald-500 transition"
                   />
                 </div>
+              </div>
 
-                <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-slate-300">Initial Status</label>
-                  <select 
-                    name="status" 
-                    defaultValue="ACTIVE"
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white focus:outline-none focus:border-emerald-500 transition cursor-pointer"
-                  >
-                    <option value="ACTIVE">ACTIVE (Available in Yard)</option>
-                    <option value="IN_SERVICE">IN_SERVICE (On Route)</option>
-                    <option value="DECOMMISSIONED">DECOMMISSIONED</option>
-                  </select>
-                </div>
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-slate-300">Initial Status</label>
+                <NextUISelect
+                  name="status"
+                  defaultValue="ACTIVE"
+                  options={statusOptions}
+                />
               </div>
 
               <div className="flex items-center justify-end gap-3 border-t border-slate-800/80 pt-4">

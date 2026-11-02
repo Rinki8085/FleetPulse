@@ -3,6 +3,7 @@
 import { useState, useTransition } from 'react';
 import { createMaintenanceTaskAction } from '@/actions/vehicles';
 import { Vehicle, MaintenanceStatus } from '@/types/fleet';
+import NextUISelect, { SelectOption } from '@/components/ui/NextUISelect';
 import { Wrench, Plus, X, Calendar, DollarSign } from 'lucide-react';
 
 interface CreateMaintenanceModalProps {
@@ -44,6 +45,20 @@ export default function CreateMaintenanceModal({
 
   const defaultDueDate = new Date(Date.now() + 7 * 86400000).toISOString().split('T')[0];
 
+  const vehicleOptions: SelectOption[] = vehicles.map((v) => ({
+    value: v.id,
+    label: v.plateNumber,
+    subLabel: `${v.model} (${v.type})`,
+    badge: v.status,
+    badgeColor: v.status === 'ACTIVE' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-sky-500/20 text-sky-400',
+  }));
+
+  const statusOptions: SelectOption[] = [
+    { value: 'SCHEDULED', label: 'Scheduled', subLabel: 'Queued for workshop service', badge: 'PLAN', badgeColor: 'bg-amber-500/20 text-amber-400' },
+    { value: 'IN_PROGRESS', label: 'In Progress', subLabel: 'Actively in service bay', badge: 'WIP', badgeColor: 'bg-cyan-500/20 text-cyan-400' },
+    { value: 'COMPLETED', label: 'Completed', subLabel: 'Repairs finished and inspected', badge: 'DONE', badgeColor: 'bg-emerald-500/20 text-emerald-400' },
+  ];
+
   return (
     <>
       <button
@@ -84,18 +99,11 @@ export default function CreateMaintenanceModal({
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-1.5">
                 <label className="text-xs font-semibold text-slate-300">Vehicle Asset *</label>
-                <select
+                <NextUISelect
                   name="vehicleId"
                   defaultValue={defaultVehicleId || vehicles[0]?.id || ''}
-                  required
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white focus:outline-none focus:border-amber-500 transition cursor-pointer"
-                >
-                  {vehicles.map((v) => (
-                    <option key={v.id} value={v.id}>
-                      {v.plateNumber} — {v.model} ({v.type})
-                    </option>
-                  ))}
-                </select>
+                  options={vehicleOptions}
+                />
               </div>
 
               <div className="space-y-1.5">
@@ -108,7 +116,7 @@ export default function CreateMaintenanceModal({
                 />
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
                   <label className="text-xs font-semibold text-slate-300">Due Date *</label>
                   <input
@@ -131,19 +139,15 @@ export default function CreateMaintenanceModal({
                     className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-amber-500 transition font-mono"
                   />
                 </div>
+              </div>
 
-                <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-slate-300">Status</label>
-                  <select
-                    name="status"
-                    defaultValue="SCHEDULED"
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white focus:outline-none focus:border-amber-500 transition cursor-pointer"
-                  >
-                    <option value="SCHEDULED">Scheduled</option>
-                    <option value="IN_PROGRESS">In Progress</option>
-                    <option value="COMPLETED">Completed</option>
-                  </select>
-                </div>
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-slate-300">Initial Status</label>
+                <NextUISelect
+                  name="status"
+                  defaultValue="SCHEDULED"
+                  options={statusOptions}
+                />
               </div>
 
               <div className="flex items-center justify-end gap-3 border-t border-slate-800/80 pt-4">

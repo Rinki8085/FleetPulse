@@ -5,6 +5,7 @@ import CreateVehicleModal from '@/components/vehicles/CreateVehicleModal';
 import EditVehicleModal from '@/components/vehicles/EditVehicleModal';
 import DeleteVehicleButton from '@/components/vehicles/DeleteVehicleButton';
 import Pagination from '@/components/vehicles/Pagination';
+import NextUISelect, { SelectOption } from '@/components/ui/NextUISelect';
 import { 
   Truck, 
   Search, 
@@ -14,11 +15,11 @@ import {
   UserCheck, 
   ShieldCheck, 
   Activity, 
-  Wrench,
-  AlertTriangle,
-  RotateCcw,
-  ArrowRight,
-  ExternalLink
+  Wrench, 
+  AlertTriangle, 
+  RotateCcw, 
+  ArrowRight, 
+  ExternalLink 
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -39,10 +40,10 @@ export default async function VehiclesPage(props: {
       search: search || undefined,
       status: status || undefined,
       page,
-      limit
+      limit,
     }),
     getDrivers(),
-    getFleetStats()
+    getFleetStats(),
   ]);
 
   const driverMap = new Map(drivers.map((d) => [d.id, d.name]));
@@ -51,19 +52,26 @@ export default async function VehiclesPage(props: {
     ACTIVE: {
       badge: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
       dot: 'bg-emerald-400',
-      label: 'Active'
+      label: 'Active',
     },
     IN_SERVICE: {
       badge: 'bg-sky-500/10 text-sky-400 border-sky-500/20',
       dot: 'bg-sky-400',
-      label: 'In Service'
+      label: 'In Service',
     },
     DECOMMISSIONED: {
       badge: 'bg-slate-700/30 text-slate-400 border-slate-700/40',
       dot: 'bg-slate-500',
-      label: 'Decommissioned'
-    }
+      label: 'Decommissioned',
+    },
   };
+
+  const statusOptions: SelectOption[] = [
+    { value: '', label: 'All Statuses' },
+    { value: 'ACTIVE', label: 'Active (In Yard)', badge: 'ACTIVE', badgeColor: 'bg-emerald-500/20 text-emerald-400' },
+    { value: 'IN_SERVICE', label: 'In Service (On Route)', badge: 'ROUTE', badgeColor: 'bg-sky-500/20 text-sky-400' },
+    { value: 'DECOMMISSIONED', label: 'Decommissioned', badge: 'IDLE', badgeColor: 'bg-slate-700/40 text-slate-400' },
+  ];
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
@@ -121,13 +129,14 @@ export default async function VehiclesPage(props: {
             <Gauge className="w-4 h-4 text-cyan-400" />
           </div>
           <div className="text-2xl font-bold text-white">
-            {stats.averageOdometer.toLocaleString()} <span className="text-xs font-normal text-slate-400">km</span>
+            {stats.averageOdometer.toLocaleString()}{' '}
+            <span className="text-xs font-normal text-slate-400">km</span>
           </div>
           <div className="text-[0.65rem] text-slate-500">Fleet average distance</div>
         </div>
       </div>
 
-      {/* Filter and Search Bar */}
+      {/* Filter and Search Bar with NextUI Select */}
       <div className="p-4 rounded-2xl bg-slate-900/60 border border-slate-800/80 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
         <form method="GET" action="/vehicles" className="flex-1 flex flex-wrap items-center gap-3">
           <div className="relative flex-1 min-w-[220px]">
@@ -137,27 +146,22 @@ export default async function VehiclesPage(props: {
               name="search"
               defaultValue={search}
               placeholder="Search by license plate or model..."
-              className="w-full pl-9 pr-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500 transition"
+              className="w-full pl-9 pr-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500 transition"
             />
           </div>
 
-          <div className="flex items-center gap-2">
-            <Filter className="w-4 h-4 text-slate-500 shrink-0" />
-            <select
+          <div className="w-48 sm:w-56">
+            <NextUISelect
               name="status"
               defaultValue={status}
-              className="px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-xs text-slate-300 focus:outline-none focus:border-emerald-500 transition cursor-pointer"
-            >
-              <option value="">All Statuses</option>
-              <option value="ACTIVE">ACTIVE (In Yard)</option>
-              <option value="IN_SERVICE">IN_SERVICE (On Route)</option>
-              <option value="DECOMMISSIONED">DECOMMISSIONED</option>
-            </select>
+              options={statusOptions}
+              icon={<Filter className="w-3.5 h-3.5" />}
+            />
           </div>
 
           <button
             type="submit"
-            className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold transition cursor-pointer"
+            className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold transition cursor-pointer"
           >
             Filter
           </button>
@@ -165,9 +169,9 @@ export default async function VehiclesPage(props: {
           {(search || status || page > 1) && (
             <Link
               href="/vehicles"
-              className="px-3 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white text-xs flex items-center gap-1.5 transition border border-slate-800"
+              className="px-3.5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white text-xs flex items-center gap-1.5 transition border border-slate-800"
             >
-              <RotateCcw className="w-3 h-3" />
+              <RotateCcw className="w-3.5 h-3.5" />
               Reset
             </Link>
           )}
@@ -175,7 +179,9 @@ export default async function VehiclesPage(props: {
 
         <div className="text-[0.7rem] text-slate-400 flex items-center gap-2 self-end md:self-center">
           <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-          <span>Role: <strong className="text-white">{session?.role}</strong></span>
+          <span>
+            Role: <strong className="text-white">{session?.role}</strong>
+          </span>
         </div>
       </div>
 
@@ -206,27 +212,24 @@ export default async function VehiclesPage(props: {
               ) : (
                 vehicles.map((v) => {
                   const driverName = v.driverId ? driverMap.get(v.driverId) : null;
-                  const fuelColor = 
-                    v.fuelLevel > 60 
-                      ? 'bg-emerald-500' 
-                      : v.fuelLevel > 25 
-                      ? 'bg-amber-500' 
+                  const fuelColor =
+                    v.fuelLevel > 60
+                      ? 'bg-emerald-500'
+                      : v.fuelLevel > 25
+                      ? 'bg-amber-500'
                       : 'bg-rose-500';
 
                   const currentStatusConfig = statusConfig[v.status] || {
                     badge: 'bg-slate-800 text-slate-400 border-slate-700',
                     dot: 'bg-slate-400',
-                    label: v.status
+                    label: v.status,
                   };
 
                   return (
-                    <tr 
-                      key={v.id} 
-                      className="hover:bg-slate-800/40 transition-colors group"
-                    >
+                    <tr key={v.id} className="hover:bg-slate-800/40 transition-colors group">
                       {/* Vehicle identifier */}
                       <td className="py-3.5 px-4">
-                        <Link 
+                        <Link
                           href={'/vehicles/' + v.id}
                           className="font-semibold text-white group-hover:text-emerald-300 transition-colors flex items-center gap-1.5"
                         >
@@ -249,7 +252,9 @@ export default async function VehiclesPage(props: {
 
                       {/* Status */}
                       <td className="py-3.5 px-4">
-                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[0.7rem] font-semibold border ${currentStatusConfig.badge}`}>
+                        <span
+                          className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[0.7rem] font-semibold border ${currentStatusConfig.badge}`}
+                        >
                           <span className={`w-1.5 h-1.5 rounded-full ${currentStatusConfig.dot}`} />
                           {currentStatusConfig.label}
                         </span>
@@ -265,7 +270,7 @@ export default async function VehiclesPage(props: {
                             </span>
                           </div>
                           <div className="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
-                            <div 
+                            <div
                               className={`h-full ${fuelColor} rounded-full transition-all`}
                               style={{ width: `${v.fuelLevel}%` }}
                             />
@@ -275,7 +280,8 @@ export default async function VehiclesPage(props: {
 
                       {/* Odometer */}
                       <td className="py-3.5 px-4 font-mono text-slate-200">
-                        {v.odometer.toLocaleString()} <span className="text-[0.65rem] text-slate-500">km</span>
+                        {v.odometer.toLocaleString()}{' '}
+                        <span className="text-[0.65rem] text-slate-500">km</span>
                       </td>
 
                       {/* Assigned Driver */}

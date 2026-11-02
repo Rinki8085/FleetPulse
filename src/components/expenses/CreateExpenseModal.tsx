@@ -3,6 +3,7 @@
 import { useState, useTransition } from 'react';
 import { addExpenseAction } from '@/actions/vehicles';
 import { Vehicle, ExpenseType } from '@/types/fleet';
+import NextUISelect, { SelectOption } from '@/components/ui/NextUISelect';
 import { Plus, X, DollarSign, Fuel, Wrench, Receipt, Tag } from 'lucide-react';
 
 interface CreateExpenseModalProps {
@@ -44,6 +45,21 @@ export default function CreateExpenseModal({
 
   const todayStr = new Date().toISOString().split('T')[0];
 
+  const vehicleOptions: SelectOption[] = vehicles.map((v) => ({
+    value: v.id,
+    label: v.plateNumber,
+    subLabel: `${v.model} (${v.type})`,
+    badge: v.status,
+    badgeColor: v.status === 'ACTIVE' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-sky-500/20 text-sky-400',
+  }));
+
+  const categoryOptions: SelectOption[] = [
+    { value: 'FUEL', label: 'Fuel & EV Charging', subLabel: 'Refuel, gas, diesel, fast charge', badge: 'FUEL', badgeColor: 'bg-emerald-500/20 text-emerald-400' },
+    { value: 'MAINTENANCE', label: 'Workshop Service & Repair', subLabel: 'Oil change, brakes, mechanical repair', badge: 'MAINT', badgeColor: 'bg-amber-500/20 text-amber-400' },
+    { value: 'TOLL', label: 'Electronic Highway Tolls', subLabel: 'Turnpike, bridge, highway pass', badge: 'TOLL', badgeColor: 'bg-cyan-500/20 text-cyan-400' },
+    { value: 'OTHER', label: 'Miscellaneous / Parking', subLabel: 'Inspection, cleaning, parking ticket', badge: 'OTHER', badgeColor: 'bg-purple-500/20 text-purple-400' },
+  ];
+
   return (
     <>
       <button
@@ -84,36 +100,23 @@ export default function CreateExpenseModal({
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-1.5">
                 <label className="text-xs font-semibold text-slate-300">Vehicle Asset *</label>
-                <select
+                <NextUISelect
                   name="vehicleId"
                   defaultValue={defaultVehicleId || vehicles[0]?.id || ''}
-                  required
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white focus:outline-none focus:border-emerald-500 transition cursor-pointer"
-                >
-                  {vehicles.map((v) => (
-                    <option key={v.id} value={v.id}>
-                      {v.plateNumber} — {v.model} ({v.type})
-                    </option>
-                  ))}
-                </select>
+                  options={vehicleOptions}
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-slate-300">Expense Category *</label>
+                <NextUISelect
+                  name="type"
+                  defaultValue="FUEL"
+                  options={categoryOptions}
+                />
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-slate-300">Expense Category *</label>
-                  <select
-                    name="type"
-                    defaultValue="FUEL"
-                    required
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white focus:outline-none focus:border-emerald-500 transition cursor-pointer"
-                  >
-                    <option value="FUEL">⛽ FUEL (Refueling / EV Charge)</option>
-                    <option value="MAINTENANCE">🔧 MAINTENANCE (Repair / Service)</option>
-                    <option value="TOLL">🛣️ TOLL (Electronic Toll Road)</option>
-                    <option value="OTHER">📦 OTHER (Parking, Inspection, Misc)</option>
-                  </select>
-                </div>
-
                 <div className="space-y-1.5">
                   <label className="text-xs font-semibold text-slate-300">Amount (USD) *</label>
                   <div className="relative">
@@ -140,15 +143,15 @@ export default function CreateExpenseModal({
                     className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white focus:outline-none focus:border-emerald-500 transition"
                   />
                 </div>
+              </div>
 
-                <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-slate-300">Notes / Invoice Ref</label>
-                  <input
-                    name="note"
-                    placeholder="e.g. Shell Station NYC - 45L Diesel"
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-emerald-500 transition"
-                  />
-                </div>
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-slate-300">Notes / Invoice Ref</label>
+                <input
+                  name="note"
+                  placeholder="e.g. Shell Station NYC - 45L Diesel"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-emerald-500 transition"
+                />
               </div>
 
               <div className="flex items-center justify-end gap-3 border-t border-slate-800/80 pt-4">
