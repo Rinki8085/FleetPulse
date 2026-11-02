@@ -1,4 +1,4 @@
-﻿import { getVehicles, getDrivers, getFleetStats } from '@/lib/data/fleetStore';
+import { getVehicles, getDrivers, getFleetStats } from '@/lib/data/fleetStore';
 import { getSession } from '@/lib/auth';
 import { VehicleStatus } from '@/types/fleet';
 import CreateVehicleModal from '@/components/vehicles/CreateVehicleModal';

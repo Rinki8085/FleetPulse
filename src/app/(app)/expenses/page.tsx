@@ -1,4 +1,4 @@
-﻿import { getVehicles, getExpenses, getMaintenanceTasks } from '@/lib/data/fleetStore';
+import { getVehicles, getExpenses, getMaintenanceTasks } from '@/lib/data/fleetStore';
 import { getSession } from '@/lib/auth';
 import { ExpenseType, MaintenanceStatus } from '@/types/fleet';
 import CreateExpenseModal from '@/components/expenses/CreateExpenseModal';

@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useTransition } from 'react';
 import { updateMaintenanceStatusAction } from '@/actions/vehicles';

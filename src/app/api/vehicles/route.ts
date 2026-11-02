@@ -1,4 +1,4 @@
-﻿import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { getVehicles, createVehicle } from '@/lib/data/fleetStore';
 import { VehicleStatus } from '@/types/fleet';
 

@@ -1,4 +1,4 @@
-﻿// Initial fleet dataset
+// Initial fleet dataset
 import { Vehicle, Driver, Expense, MaintenanceTask, Trip, User } from '@/types/fleet';
 
 export const initialVehicles: Vehicle[] = [

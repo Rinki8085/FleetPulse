@@ -1,4 +1,4 @@
-﻿import { getFleetStats } from '@/lib/data/fleetStore';
+import { getFleetStats } from '@/lib/data/fleetStore';
 import { LayoutDashboard, TrendingUp, DollarSign, Wrench, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 

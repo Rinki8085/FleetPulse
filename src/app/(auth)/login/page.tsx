@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useState } from 'react';
 import { Truck, ShieldCheck, Eye, Sparkles, KeyRound, AlertCircle, ArrowRight, Loader2 } from 'lucide-react';
